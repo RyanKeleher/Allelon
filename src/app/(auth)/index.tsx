@@ -17,6 +17,8 @@ export default function SignIn() {
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [apple, setApple] = useState(false);
+  // Shown inline as well as in an alert: Alert.alert does nothing on web.
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     appleSignInAvailable().then(setApple);
@@ -24,13 +26,16 @@ export default function SignIn() {
 
   async function run(fn: () => Promise<void>) {
     setBusy(true);
+    setError(null);
     try {
       await fn();
     } catch (e) {
       const err = e as { code?: string; message?: string };
       // Cancelling a native sheet is not an error worth showing.
       if (err.code !== 'ERR_REQUEST_CANCELED' && err.code !== 'SIGN_IN_CANCELLED') {
-        Alert.alert('Could not sign in', err.message ?? 'Please try again.');
+        const message = friendlyAuthError(err.message);
+        setError(message);
+        Alert.alert('Could not sign in', message);
       }
     } finally {
       setBusy(false);
@@ -61,6 +66,12 @@ export default function SignIn() {
           Pray for one another, and see what God does.
         </Text>
       </View>
+
+      {error ? (
+        <Text tone="danger" accessibilityRole="alert" accessibilityLiveRegion="assertive">
+          {error}
+        </Text>
+      ) : null}
 
       {sentTo ? (
         <View style={styles.form}>
@@ -120,6 +131,16 @@ export default function SignIn() {
       )}
     </Screen>
   );
+}
+
+function friendlyAuthError(message: string | undefined): string {
+  if (!message) return 'Please try again.';
+  if (/sending.*email|smtp|confirmation mail|magic link/i.test(message)) {
+    return "We couldn't send the email. The app's email settings may need attention. Please try again later.";
+  }
+  if (/rate limit/i.test(message)) return 'Too many attempts. Please wait a minute and try again.';
+  if (/expired|invalid/i.test(message)) return 'That code is invalid or has expired. Request a new one.';
+  return message;
 }
 
 const styles = StyleSheet.create({
