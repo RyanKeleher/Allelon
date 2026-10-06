@@ -93,7 +93,8 @@ export default function RequestDetail() {
                 <View style={styles.privateNote}>
                   <Ionicons name="lock-closed" size={12} color={colors.private} />
                   <Text variant="caption" tone="private">
-                    Private: only {card.is_mine ? 'you and them' : `you and ${authorFirst}`}
+                    Private: only you and{' '}
+                    {card.is_mine ? (r.author?.display_name?.split(' ')[0] ?? 'them') : authorFirst}
                   </Text>
                 </View>
               ) : null}

@@ -44,6 +44,40 @@ npm start                      # Expo dev server
 
 Apple and Google sign-in use native modules, so they need a development build (`npx expo run:ios` / `run:android`, or `eas build --profile development`). Email sign-in works in any build. Locally, emailed codes appear in Mailpit at http://127.0.0.1:54324.
 
+## Try it on your phone
+
+You need a computer with Node 20+ and a phone with the free **Expo Go** app (App Store / Google Play).
+
+1. **Create a backend.** Make a free project at [supabase.com](https://supabase.com). In the project, open **Project Settings → API** and copy the Project URL and the `anon` public key.
+2. **Load the schema.** On your computer:
+   ```bash
+   git clone https://github.com/RyanKeleher/Allelon.git && cd Allelon
+   git checkout claude/beautiful-babbage-uwma03
+   npm install
+   npx supabase login
+   npx supabase link --project-ref <your-project-ref>
+   npx supabase db push --include-seed
+   ```
+3. **Send sign-in codes.** In Supabase, go to **Authentication → Emails → Magic Link**, and put `{{ .Token }}` in the template body, so emails contain a 6-digit code.
+4. **Point the app at it.** Create `.env.local`:
+   ```
+   EXPO_PUBLIC_SUPABASE_URL=https://<your-project-ref>.supabase.co
+   EXPO_PUBLIC_SUPABASE_ANON_KEY=<anon key>
+   ```
+5. **Run it.** `npx expo start`, then scan the QR code (iPhone: Camera app; Android: Expo Go). Your phone and computer must be on the same Wi-Fi, or use `npx expo start --tunnel`.
+
+Sign in with your email code. Apple and Google sign-in need a development build, not Expo Go.
+
+Want sample people and requests? Paste `supabase/demo.sql` into the Supabase SQL editor. It creates Grace, James, Yuki, Rachel, and Daniel. They follow each other. After you sign in, search for `@gracemiller` and follow her. Follows need approval, so accept your request on her behalf in the SQL editor:
+```sql
+update follows set status = 'accepted'
+where followee_id = 'd0000000-0000-0000-0000-000000000001' and status = 'pending';
+```
+
+### Quick preview in a browser
+
+`npx expo start --web` runs the same screens in a browser. `scripts/screenshots.mjs` captures phone-sized screenshots of every Phase 1 screen against a local stack loaded with `supabase/demo.sql`.
+
 ## Checks
 
 ```bash
