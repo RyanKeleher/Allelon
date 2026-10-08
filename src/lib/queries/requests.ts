@@ -210,3 +210,15 @@ export function useDeleteRequest() {
     onSuccess: () => qc.invalidateQueries({ queryKey: requestKeys.all }),
   });
 }
+
+/** Their requests I've prayed for: the "prayed through together" thread. */
+export function usePrayedTogether(personId: string) {
+  return useQuery({
+    queryKey: [...requestKeys.all, 'together', personId],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('prayed_together', { p_person: personId });
+      if (error) throw error;
+      return (data ?? []).map(toCard);
+    },
+  });
+}

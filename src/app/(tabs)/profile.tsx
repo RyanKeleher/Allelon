@@ -27,6 +27,7 @@ export default function MyProfile() {
   const links: { label: string; icon: keyof typeof Ionicons.glyphMap; href: Href; badge?: number }[] = [
     { label: 'Follow requests', icon: 'mail-outline', href: '/follow-requests', badge: requests?.length },
     { label: 'Followers & following', icon: 'people-outline', href: '/connections' },
+    { label: 'Close friends', icon: 'lock-closed-outline', href: '/close-friends' },
     { label: 'Settings', icon: 'settings-outline', href: '/settings' },
   ];
 

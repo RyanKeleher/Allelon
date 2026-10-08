@@ -28,7 +28,7 @@ This rule is enforced in Postgres row-level security (`private.can_view_request`
 4. It is shared with a **group** they belong to.
 5. It is shared with the **World**.
 
-Hidden (moderated) requests and anyone on either side of a block are excluded. Private responses are readable only by their sender and the request's author. Anonymous World posts never expose the author: `prayer_requests.author_id` cannot be selected by clients, and `request_cards.author_id` is null for anonymous posts.
+Hidden (moderated) requests and anyone on either side of a block are excluded. Group membership changes only through database functions: anyone with an invite code can *ask* to join, a group admin approves each request, and a removed member loses access immediately. These rules are tested in `supabase/tests/groups.test.sql`. Private responses are readable only by their sender and the request's author. Anonymous World posts never expose the author: `prayer_requests.author_id` cannot be selected by clients, and `request_cards.author_id` is null for anonymous posts.
 
 ## Getting started
 

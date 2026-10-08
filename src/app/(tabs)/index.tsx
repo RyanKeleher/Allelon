@@ -4,6 +4,7 @@ import { FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-nat
 
 import { Button } from '@/components/Button';
 import { EmptyState } from '@/components/EmptyState';
+import { GroupsRow } from '@/components/GroupsRow';
 import { RequestCard } from '@/components/RequestCard';
 import { Screen } from '@/components/Screen';
 import { Text } from '@/components/Text';
@@ -39,6 +40,7 @@ export default function Home() {
           />
         }
         ListHeaderComponent={
+          <View>
           <View style={styles.header}>
             <Text variant="title">Allelon</Text>
             <View style={styles.headerActions}>
@@ -60,6 +62,8 @@ export default function Home() {
                 {pending ? <View style={[styles.dot, { backgroundColor: colors.accent }]} /> : null}
               </Pressable>
             </View>
+          </View>
+          <GroupsRow />
           </View>
         }
         ListEmptyComponent={

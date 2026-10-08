@@ -180,3 +180,36 @@ export function useUpdateProfile(myId: string) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['profile', myId] }),
   });
 }
+
+/** My private close friends list (only I can read it). */
+export function useCloseFriends() {
+  return useQuery({
+    queryKey: ['close-friends'],
+    queryFn: async (): Promise<string[]> => {
+      const { data, error } = await supabase.from('close_friends').select('friend_id');
+      if (error) throw error;
+      return data.map((r) => r.friend_id);
+    },
+  });
+}
+
+export function useSetCloseFriend() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ friendId, on }: { friendId: string; on: boolean }) => {
+      const { error } = on
+        ? await supabase.from('close_friends').insert({ friend_id: friendId })
+        : await supabase.from('close_friends').delete().eq('friend_id', friendId);
+      if (error && error.code !== '23505') throw error;
+    },
+    onMutate: async ({ friendId, on }) => {
+      qc.setQueryData<string[]>(['close-friends'], (ids = []) =>
+        on ? [...new Set([...ids, friendId])] : ids.filter((id) => id !== friendId),
+      );
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ['close-friends'] });
+      qc.invalidateQueries({ queryKey: ['requests'] });
+    },
+  });
+}

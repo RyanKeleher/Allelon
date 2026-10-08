@@ -1,11 +1,12 @@
 import { getLocales } from 'expo-localization';
 import { useMemo, useState } from 'react';
-import { Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Screen } from '@/components/Screen';
 import { Text } from '@/components/Text';
 import { TextField } from '@/components/TextField';
+import { notify } from '@/lib/dialogs';
 import { useAuth, useMyProfile, useUserId } from '@/lib/auth';
 import { flagFor, useCountries } from '@/lib/queries/lookups';
 import { useUpdateProfile } from '@/lib/queries/people';
@@ -50,7 +51,7 @@ export default function Onboarding() {
       });
     } catch (e) {
       const err = e as { code?: string; message?: string };
-      Alert.alert(
+      notify(
         'Could not save',
         err.code === '23505' ? 'That handle is taken. Try another.' : (err.message ?? 'Please try again.'),
       );

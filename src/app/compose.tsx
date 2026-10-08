@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Switch, View } from 'react-native';
+import { Pressable, StyleSheet, Switch, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
@@ -18,9 +18,11 @@ import {
   toggleAudience,
   toggleGroup,
 } from '@/lib/audience';
+import { errorMessage, notify } from '@/lib/dialogs';
 import { useMyProfile, useUserId } from '@/lib/auth';
 import { pickPhoto, uploadRequestPhoto, type PickedPhoto } from '@/lib/photos';
-import { flagFor, useMyGroups, usePassions } from '@/lib/queries/lookups';
+import { useMyGroups } from '@/lib/queries/groups';
+import { flagFor, usePassions } from '@/lib/queries/lookups';
 import { useCreateRequest } from '@/lib/queries/requests';
 import type { RequestKind } from '@/lib/types';
 import { hitSize, radius, space, useAppTheme } from '@/theme';
@@ -63,7 +65,7 @@ export default function Compose() {
       });
       router.back();
     } catch (e) {
-      Alert.alert('Could not share', (e as Error).message ?? 'Please try again.');
+      notify('Could not share', errorMessage(e));
     } finally {
       setPosting(false);
     }

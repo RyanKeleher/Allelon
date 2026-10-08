@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
@@ -11,6 +11,7 @@ import { RequestCard } from '@/components/RequestCard';
 import { Screen } from '@/components/Screen';
 import { Text } from '@/components/Text';
 import { TextField } from '@/components/TextField';
+import { confirm, errorMessage, notify } from '@/lib/dialogs';
 import { useUserId } from '@/lib/auth';
 import { useDeleteRequest, useRequest, useRespond, useResponses } from '@/lib/queries/requests';
 import { timeAgo } from '@/lib/time';
@@ -44,22 +45,20 @@ export default function RequestDetail() {
       await send.mutateAsync({ body, isPrivate });
       setBody('');
     } catch (e) {
-      Alert.alert('Could not send', (e as Error).message);
+      notify('Could not send', errorMessage(e));
     }
   }
 
-  function confirmDelete() {
-    Alert.alert('Delete this request?', 'It will be removed for everyone, along with its responses.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          await remove.mutateAsync(id);
-          router.back();
-        },
-      },
-    ]);
+  async function confirmDelete() {
+    const ok = await confirm(
+      'Delete this request?',
+      'It will be removed for everyone, along with its responses.',
+      'Delete',
+      { destructive: true },
+    );
+    if (!ok) return;
+    await remove.mutateAsync(id);
+    router.back();
   }
 
   return (

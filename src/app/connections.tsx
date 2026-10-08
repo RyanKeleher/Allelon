@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
@@ -7,6 +7,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { PersonRow } from '@/components/PersonRow';
 import { Screen } from '@/components/Screen';
 import { useUserId } from '@/lib/auth';
+import { confirm } from '@/lib/dialogs';
 import { useFollowers, useFollowing, useRemoveFollow, type PersonSummary } from '@/lib/queries/people';
 import { space } from '@/theme';
 
@@ -17,23 +18,21 @@ export default function Connections() {
   const following = useFollowing(userId);
   const remove = useRemoveFollow();
 
-  function confirm(person: PersonSummary, action: 'remove' | 'unfollow') {
-    const title = action === 'remove' ? `Remove ${person.display_name}?` : `Unfollow ${person.display_name}?`;
-    const message =
-      action === 'remove' ? "They won't be told, and they will stop seeing requests you share with followers." : undefined;
-    Alert.alert(title, message, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: action === 'remove' ? 'Remove' : 'Unfollow',
-        style: 'destructive',
-        onPress: () =>
-          remove.mutate(
-            action === 'remove'
-              ? { followerId: person.id, followeeId: userId }
-              : { followerId: userId, followeeId: person.id },
-          ),
-      },
-    ]);
+  async function confirmRemoval(person: PersonSummary, action: 'remove' | 'unfollow') {
+    const ok = await confirm(
+      action === 'remove' ? `Remove ${person.display_name}?` : `Unfollow ${person.display_name}?`,
+      action === 'remove'
+        ? "They won't be told, and they will stop seeing requests you share with followers."
+        : undefined,
+      action === 'remove' ? 'Remove' : 'Unfollow',
+      { destructive: true },
+    );
+    if (!ok) return;
+    remove.mutate(
+      action === 'remove'
+        ? { followerId: person.id, followeeId: userId }
+        : { followerId: userId, followeeId: person.id },
+    );
   }
 
   const data = tab === 'followers' ? (followers.data ?? []) : (following.data ?? []);
@@ -55,7 +54,7 @@ export default function Connections() {
               <Button
                 label={tab === 'followers' ? 'Remove' : item.pending ? 'Cancel request' : 'Unfollow'}
                 variant="ghost"
-                onPress={() => confirm(item, tab === 'followers' ? 'remove' : 'unfollow')}
+                onPress={() => confirmRemoval(item, tab === 'followers' ? 'remove' : 'unfollow')}
               />
             }
           />

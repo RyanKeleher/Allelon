@@ -87,6 +87,11 @@ function RootNavigator() {
           <Stack.Screen name="follow-requests" options={{ title: 'Follow requests' }} />
           <Stack.Screen name="connections" options={{ title: 'Followers & following' }} />
           <Stack.Screen name="settings" options={{ title: 'Settings' }} />
+          <Stack.Screen name="close-friends" options={{ title: 'Close friends' }} />
+          <Stack.Screen name="group/new" options={{ presentation: 'modal', title: 'New group' }} />
+          <Stack.Screen name="group/[id]/index" options={{ title: '' }} />
+          <Stack.Screen name="group/[id]/members" options={{ title: 'Members' }} />
+          <Stack.Screen name="join/[code]" options={{ title: 'Join group' }} />
         </Stack.Protected>
       </Stack>
     </ThemeProvider>

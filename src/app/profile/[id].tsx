@@ -1,5 +1,6 @@
-import { Redirect, useLocalSearchParams } from 'expo-router';
-import { Alert, StyleSheet, View } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { Redirect, router, useLocalSearchParams } from 'expo-router';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
@@ -8,16 +9,20 @@ import { RequestCard } from '@/components/RequestCard';
 import { Screen } from '@/components/Screen';
 import { Text } from '@/components/Text';
 import { useUserId } from '@/lib/auth';
+import { confirm } from '@/lib/dialogs';
 import { useFollow, useFollowState, useProfile, useRemoveFollow } from '@/lib/queries/people';
-import { useRequestsByAuthor } from '@/lib/queries/requests';
-import { space } from '@/theme';
+import { usePrayedTogether, useRequestsByAuthor } from '@/lib/queries/requests';
+import { timeAgo } from '@/lib/time';
+import { hitSize, space, useAppTheme } from '@/theme';
 
 export default function PersonProfile() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const userId = useUserId();
+  const { colors } = useAppTheme();
   const profile = useProfile(id);
   const state = useFollowState(userId, id);
   const requests = useRequestsByAuthor(id);
+  const together = usePrayedTogether(id);
   const follow = useFollow();
   const unfollow = useRemoveFollow();
 
@@ -35,20 +40,19 @@ export default function PersonProfile() {
   const outgoing = state.data?.outgoing ?? 'none';
   const firstName = person.display_name.split(' ')[0] || 'them';
 
-  function onFollowPress() {
+  async function onFollowPress() {
     if (outgoing === 'none') {
       follow.mutate(id);
       return;
     }
-    const title = outgoing === 'pending' ? 'Cancel follow request?' : `Unfollow ${person.display_name}?`;
-    Alert.alert(title, undefined, [
-      { text: 'Keep', style: 'cancel' },
-      {
-        text: outgoing === 'pending' ? 'Cancel request' : 'Unfollow',
-        style: 'destructive',
-        onPress: () => unfollow.mutate({ followerId: userId, followeeId: id }),
-      },
-    ]);
+    const pending = outgoing === 'pending';
+    const ok = await confirm(
+      pending ? 'Cancel follow request?' : `Unfollow ${person.display_name}?`,
+      undefined,
+      pending ? 'Cancel request' : 'Unfollow',
+      { destructive: true, cancelLabel: 'Keep' },
+    );
+    if (ok) unfollow.mutate({ followerId: userId, followeeId: id });
   }
 
   return (
@@ -78,6 +82,33 @@ export default function PersonProfile() {
         </Text>
       ) : null}
 
+      {together.data?.length ? (
+        <View style={[styles.together, { borderColor: colors.border }]}>
+          <Text variant="heading">What you’ve prayed through together</Text>
+          {together.data.map((r) => (
+            <Pressable
+              key={r.id}
+              onPress={() => router.push({ pathname: '/request/[id]', params: { id: r.id } })}
+              accessibilityRole="button"
+              accessibilityLabel={`${r.status === 'answered' ? 'Answered: ' : ''}${r.body}`}
+              style={styles.togetherRow}
+            >
+              <Ionicons
+                name={r.status === 'answered' ? 'sunny' : 'ellipse-outline'}
+                size={16}
+                color={r.status === 'answered' ? colors.answered : colors.textMuted}
+              />
+              <Text numberOfLines={2} style={styles.flex}>
+                {r.body}
+              </Text>
+              <Text variant="caption" tone="muted">
+                {timeAgo(r.created_at)}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
+
       <Text variant="heading" style={styles.sectionTitle}>
         Requests
       </Text>
@@ -101,4 +132,6 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: space.lg, paddingTop: space.lg },
   flex: { flex: 1 },
   sectionTitle: { paddingTop: space.lg },
+  together: { gap: space.sm, paddingTop: space.lg, borderTopWidth: StyleSheet.hairlineWidth },
+  togetherRow: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: hitSize },
 });

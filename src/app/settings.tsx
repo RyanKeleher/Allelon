@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Screen } from '@/components/Screen';
 import { Text } from '@/components/Text';
 import { TextField } from '@/components/TextField';
+import { errorMessage, notify } from '@/lib/dialogs';
 import { useMyProfile, useUserId } from '@/lib/auth';
 import { useUpdateProfile } from '@/lib/queries/people';
 import { supabase } from '@/lib/supabase';
@@ -20,9 +21,9 @@ export default function Settings() {
   async function save() {
     try {
       await update.mutateAsync({ display_name: name.trim(), bio: bio.trim() });
-      Alert.alert('Saved');
+      notify('Saved');
     } catch (e) {
-      Alert.alert('Could not save', (e as Error).message);
+      notify('Could not save', errorMessage(e));
     }
   }
 

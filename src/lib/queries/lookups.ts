@@ -34,14 +34,3 @@ export function flagFor(code: string): string {
     .map((c) => String.fromCodePoint(0x1f1e6 + c.charCodeAt(0) - 65))
     .join('');
 }
-
-export function useMyGroups() {
-  return useQuery({
-    queryKey: ['groups', 'mine'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('groups').select('id, name, icon').order('name');
-      if (error) throw error;
-      return data;
-    },
-  });
-}

@@ -111,6 +111,62 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"group_invites": {
+                  Row: {
+                    "code": string,"created_at": string,"created_by": string | null,"group_id": string,"revoked_at": string | null
+                  }
+                  Insert: {
+                    "code"?: string,"created_at"?: string,"created_by"?: string | null,"group_id": string,"revoked_at"?: string | null
+                  }
+                  Update: {
+                    "code"?: string,"created_at"?: string,"created_by"?: string | null,"group_id"?: string,"revoked_at"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "group_invites_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "group_invites_group_id_fkey"
+      columns: ["group_id"]
+isOneToOne: false
+      referencedRelation: "groups"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"group_join_requests": {
+                  Row: {
+                    "created_at": string,"group_id": string,"invite_code": string | null,"user_id": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"group_id": string,"invite_code"?: string | null,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"group_id"?: string,"invite_code"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "group_join_requests_group_id_fkey"
+      columns: ["group_id"]
+isOneToOne: false
+      referencedRelation: "groups"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "group_join_requests_invite_code_fkey"
+      columns: ["invite_code"]
+isOneToOne: false
+      referencedRelation: "group_invites"
+      referencedColumns: ["code"]
+    },{
+      foreignKeyName: "group_join_requests_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"group_members": {
                   Row: {
                     "group_id": string,"joined_at": string,"role": Database["public"]['Enums']["group_role"],"user_id": string
@@ -336,8 +392,53 @@ isOneToOne: false
                 }
           }
           Functions: {
-            "create_prayer_request":
+            "cancel_join_request":
+{ Args: { "p_group_id": string }; Returns: undefined
+                           },
+"create_group":
+{ Args: { "p_description"?: string,"p_icon"?: string,"p_name": string }; Returns: string
+                           },
+"create_prayer_request":
 { Args: { "p_audiences"?: (string)[],"p_body": string,"p_country_code"?: string,"p_group_ids"?: (string)[],"p_is_anonymous"?: boolean,"p_kind"?: Database["public"]['Enums']["request_kind"],"p_language"?: string,"p_moment_label"?: string,"p_passion_id"?: string,"p_photo_path"?: string }; Returns: string
+                           },
+"group_feed":
+{ Args: { "p_before"?: string,"p_group_id": string,"p_limit"?: number }; Returns: {
+              "answered_at": string | null,
+"answered_update": string | null,
+"audiences": Json | null,
+"author_avatar_url": string | null,
+"author_handle": string | null,
+"author_id": string | null,
+"author_name": string | null,
+"body": string | null,
+"country_code": string | null,
+"created_at": string | null,
+"id": string | null,
+"is_anonymous": boolean | null,
+"is_mine": boolean | null,
+"kind": Database["public"]['Enums']["request_kind"] | null,
+"language": string | null,
+"moment_label": string | null,
+"passion_id": string | null,
+"photo_path": string | null,
+"prayed_by_me": boolean | null,
+"prayer_count": number | null,
+"response_count": number | null,
+"status": Database["public"]['Enums']["request_status"] | null
+            }[]
+                          SetofOptions: {
+        from: "*"
+        to: "request_cards"
+        isOneToOne: false
+        isSetofReturn: true
+      } },
+"group_for_invite":
+{ Args: { "p_code": string }; Returns: {
+              "description": string,"group_id": string,"has_pending_request": boolean,"icon": string,"is_member": boolean,"member_count": number,"name": string
+            }[]
+                           },
+"group_invite_code":
+{ Args: { "p_group_id": string }; Returns: string
                            },
 "home_feed":
 { Args: { "p_before"?: string,"p_limit"?: number }; Returns: {
@@ -369,7 +470,59 @@ isOneToOne: false
         to: "request_cards"
         isOneToOne: false
         isSetofReturn: true
-      } }
+      } },
+"leave_group":
+{ Args: { "p_group_id": string }; Returns: undefined
+                           },
+"prayed_together":
+{ Args: { "p_person": string }; Returns: {
+              "answered_at": string | null,
+"answered_update": string | null,
+"audiences": Json | null,
+"author_avatar_url": string | null,
+"author_handle": string | null,
+"author_id": string | null,
+"author_name": string | null,
+"body": string | null,
+"country_code": string | null,
+"created_at": string | null,
+"id": string | null,
+"is_anonymous": boolean | null,
+"is_mine": boolean | null,
+"kind": Database["public"]['Enums']["request_kind"] | null,
+"language": string | null,
+"moment_label": string | null,
+"passion_id": string | null,
+"photo_path": string | null,
+"prayed_by_me": boolean | null,
+"prayer_count": number | null,
+"response_count": number | null,
+"status": Database["public"]['Enums']["request_status"] | null
+            }[]
+                          SetofOptions: {
+        from: "*"
+        to: "request_cards"
+        isOneToOne: false
+        isSetofReturn: true
+      } },
+"remove_group_member":
+{ Args: { "p_group_id": string,"p_user_id": string }; Returns: undefined
+                           },
+"request_to_join_group":
+{ Args: { "p_code": string }; Returns: string
+                           },
+"reset_group_invite_code":
+{ Args: { "p_group_id": string }; Returns: string
+                           },
+"respond_to_join_request":
+{ Args: { "p_approve": boolean,"p_group_id": string,"p_user_id": string }; Returns: undefined
+                           },
+"set_group_member_role":
+{ Args: { "p_group_id": string,"p_role": Database["public"]['Enums']["group_role"],"p_user_id": string }; Returns: undefined
+                           },
+"update_group":
+{ Args: { "p_description": string,"p_group_id": string,"p_icon": string,"p_name": string }; Returns: undefined
+                           }
           }
           Enums: {
             "audience_type": "followers"|"close_friends"|"group"|"world","follow_status": "pending"|"accepted","group_role": "admin"|"member","request_kind": "request"|"moment","request_status": "open"|"answered"
