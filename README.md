@@ -58,7 +58,7 @@ You need a computer with Node 20+ and a phone with the free **Expo Go** app (App
    npx supabase link --project-ref <your-project-ref>
    npx supabase db push --include-seed
    ```
-3. **Send sign-in codes.** In Supabase, go to **Authentication → Emails → Magic Link**, and put `{{ .Token }}` in the template body, so emails contain a 6-digit code.
+3. **Send sign-in codes.** In Supabase, go to **Authentication → Emails → Magic Link**, and put `{{ .Token }}` in the template body, so emails contain a sign-in code (6–10 digits, set under Authentication → Sign In / Providers → Email).
 4. **Point the app at it.** Create `.env.local`:
    ```
    EXPO_PUBLIC_SUPABASE_URL=https://<your-project-ref>.supabase.co

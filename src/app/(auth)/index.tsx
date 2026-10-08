@@ -75,15 +75,15 @@ export default function SignIn() {
 
       {sentTo ? (
         <View style={styles.form}>
-          <Text tone="muted">We sent a 6-digit code to {sentTo}.</Text>
+          <Text tone="muted">We sent a sign-in code to {sentTo}.</Text>
           <TextField
             label="Code"
             value={code}
-            onChangeText={setCode}
+            onChangeText={(t) => setCode(t.replace(/\D/g, ''))}
             keyboardType="number-pad"
             textContentType="oneTimeCode"
             autoComplete="one-time-code"
-            maxLength={6}
+            maxLength={10}
             autoFocus
           />
           <Button label="Continue" onPress={verify} loading={busy} disabled={code.trim().length < 6} />
