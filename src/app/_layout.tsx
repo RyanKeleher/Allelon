@@ -92,6 +92,7 @@ function RootNavigator() {
           <Stack.Screen name="group/[id]/index" options={{ title: '' }} />
           <Stack.Screen name="group/[id]/members" options={{ title: 'Members' }} />
           <Stack.Screen name="join/[code]" options={{ title: 'Join group' }} />
+          <Stack.Screen name="country/[code]" options={{ title: '' }} />
         </Stack.Protected>
       </Stack>
     </ThemeProvider>

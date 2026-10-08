@@ -68,6 +68,13 @@ insert into public.prayer_requests (id, author_id, kind, moment_label, body, pas
   ('d2000000-0000-0000-0000-000000000006', 'd0000000-0000-0000-0000-000000000004', 'request', null,
    'For the families displaced by this week''s floods: shelter, clean water, and neighbors who show up.', 'peace', 'US', 'en', now() - interval '4 days');
 
+-- World requests in other languages, for the globe and translation.
+insert into public.prayer_requests (id, author_id, kind, body, passion_id, country_code, language, created_at) values
+  ('d2000000-0000-0000-0000-000000000007', 'd0000000-0000-0000-0000-000000000005', 'request',
+   'Orem pela minha mãe, que começa a quimioterapia na segunda-feira. Que ela sinta a paz de Deus.', 'health', 'BR', 'pt', now() - interval '6 hours'),
+  ('d2000000-0000-0000-0000-000000000008', 'd0000000-0000-0000-0000-000000000003', 'request',
+   '다음 주에 새 직장을 시작합니다. 동료들과 좋은 관계를 맺고 빛이 될 수 있도록 기도해 주세요.', 'work', 'KR', 'ko', now() - interval '20 hours');
+
 insert into public.prayer_audiences (request_id, audience_type, group_id) values
   ('d2000000-0000-0000-0000-000000000001', 'close_friends', null),
   ('d2000000-0000-0000-0000-000000000002', 'followers', null),
@@ -76,7 +83,9 @@ insert into public.prayer_audiences (request_id, audience_type, group_id) values
   ('d2000000-0000-0000-0000-000000000005', 'followers', null),
   ('d2000000-0000-0000-0000-000000000005', 'close_friends', null),
   ('d2000000-0000-0000-0000-000000000006', 'followers', null),
-  ('d2000000-0000-0000-0000-000000000006', 'world', null);
+  ('d2000000-0000-0000-0000-000000000006', 'world', null),
+  ('d2000000-0000-0000-0000-000000000007', 'world', null),
+  ('d2000000-0000-0000-0000-000000000008', 'world', null);
 
 insert into public.responses (request_id, author_id, body, is_private, created_at) values
   ('d2000000-0000-0000-0000-000000000005', 'd0000000-0000-0000-0000-000000000002',

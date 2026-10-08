@@ -12,7 +12,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   version: '0.1.0',
   orientation: 'portrait',
   icon: './assets/icon.png',
-  userInterfaceStyle: 'automatic',
+  userInterfaceStyle: 'automatic', // the app picks light by default; see src/theme
   ios: {
     bundleIdentifier: 'app.allelon',
     supportsTablet: false,

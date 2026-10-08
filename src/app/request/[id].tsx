@@ -12,8 +12,9 @@ import { Screen } from '@/components/Screen';
 import { Text } from '@/components/Text';
 import { TextField } from '@/components/TextField';
 import { confirm, errorMessage, notify } from '@/lib/dialogs';
-import { useUserId } from '@/lib/auth';
+import { useMyProfile, useUserId } from '@/lib/auth';
 import { useDeleteRequest, useRequest, useRespond, useResponses } from '@/lib/queries/requests';
+import { useSuggestResponse } from '@/lib/queries/world';
 import { timeAgo } from '@/lib/time';
 import { radius, space, useAppTheme } from '@/theme';
 
@@ -26,6 +27,9 @@ export default function RequestDetail() {
   const send = useRespond(id);
   const remove = useDeleteRequest();
   const [body, setBody] = useState('');
+  const { data: me } = useMyProfile();
+  const suggest = useSuggestResponse();
+  const [suggested, setSuggested] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
 
   const card = request.data;
@@ -44,6 +48,7 @@ export default function RequestDetail() {
     try {
       await send.mutateAsync({ body, isPrivate });
       setBody('');
+      setSuggested(false);
     } catch (e) {
       notify('Could not send', errorMessage(e));
     }
@@ -127,6 +132,29 @@ export default function RequestDetail() {
             />
           </View>
         )}
+        {card.is_mine ? null : (
+          <View style={styles.helpRow}>
+            <Button
+              label={suggested ? 'Suggest different words' : 'Help me write'}
+              variant="ghost"
+              loading={suggest.isPending}
+              onPress={async () => {
+                try {
+                  const text = await suggest.mutateAsync({ requestId: id, language: me?.preferred_language ?? 'en' });
+                  setBody(text);
+                  setSuggested(true);
+                } catch (e) {
+                  notify('Could not suggest words', errorMessage(e));
+                }
+              }}
+            />
+            {suggested ? (
+              <Text variant="caption" tone="muted">
+                Suggested by AI. Make the words your own before you send.
+              </Text>
+            ) : null}
+          </View>
+        )}
         <Button label="Send" onPress={submit} loading={send.isPending} disabled={!body.trim()} />
       </View>
 
@@ -146,4 +174,5 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: space.sm, flexWrap: 'wrap' },
   flex: { flex: 1 },
   delete: { marginTop: space.xl },
+  helpRow: { alignItems: 'flex-start', gap: space.xs },
 });

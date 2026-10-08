@@ -23,7 +23,26 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "blocks": {
+            "ai_usage": {
+                  Row: {
+                    "created_at": string,"id": number,"kind": string,"user_id": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"id"?: never,"kind": string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: never,"kind"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ai_usage_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"blocks": {
                   Row: {
                     "blocked_id": string,"blocker_id": string,"created_at": string
                   }
@@ -336,6 +355,31 @@ isOneToOne: false
       referencedColumns: ["code"]
     }
                   ]
+                },"request_translations": {
+                  Row: {
+                    "answered_update": string | null,"body": string,"created_at": string,"request_id": string,"source_hash": string,"target_language": string
+                  }
+                  Insert: {
+                    "answered_update"?: string | null,"body": string,"created_at"?: string,"request_id": string,"source_hash": string,"target_language": string
+                  }
+                  Update: {
+                    "answered_update"?: string | null,"body"?: string,"created_at"?: string,"request_id"?: string,"source_hash"?: string,"target_language"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "request_translations_request_id_fkey"
+      columns: ["request_id"]
+isOneToOne: false
+      referencedRelation: "prayer_requests"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "request_translations_request_id_fkey"
+      columns: ["request_id"]
+isOneToOne: false
+      referencedRelation: "request_cards"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"responses": {
                   Row: {
                     "author_id": string,"body": string,"created_at": string,"hidden_at": string | null,"id": string,"is_private": boolean,"request_id": string
@@ -522,7 +566,43 @@ isOneToOne: false
                            },
 "update_group":
 { Args: { "p_description": string,"p_group_id": string,"p_icon": string,"p_name": string }; Returns: undefined
-                           }
+                           },
+"world_counts":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "country_code": string,"open_requests": number
+            }[]
+                           },
+"world_feed":
+{ Args: { "p_before"?: string,"p_country": string,"p_limit"?: number }; Returns: {
+              "answered_at": string | null,
+"answered_update": string | null,
+"audiences": Json | null,
+"author_avatar_url": string | null,
+"author_handle": string | null,
+"author_id": string | null,
+"author_name": string | null,
+"body": string | null,
+"country_code": string | null,
+"created_at": string | null,
+"id": string | null,
+"is_anonymous": boolean | null,
+"is_mine": boolean | null,
+"kind": Database["public"]['Enums']["request_kind"] | null,
+"language": string | null,
+"moment_label": string | null,
+"passion_id": string | null,
+"photo_path": string | null,
+"prayed_by_me": boolean | null,
+"prayer_count": number | null,
+"response_count": number | null,
+"status": Database["public"]['Enums']["request_status"] | null
+            }[]
+                          SetofOptions: {
+        from: "*"
+        to: "request_cards"
+        isOneToOne: false
+        isSetofReturn: true
+      } }
           }
           Enums: {
             "audience_type": "followers"|"close_friends"|"group"|"world","follow_status": "pending"|"accepted","group_role": "admin"|"member","request_kind": "request"|"moment","request_status": "open"|"answered"

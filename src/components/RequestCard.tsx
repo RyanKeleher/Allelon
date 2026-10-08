@@ -2,9 +2,13 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { useMyProfile } from '@/lib/auth';
+import { errorMessage, notify } from '@/lib/dialogs';
 import { usePassions } from '@/lib/queries/lookups';
+import { baseLanguage, useTranslateRequest, type Translation } from '@/lib/queries/world';
 import { usePray } from '@/lib/queries/requests';
 import { signedPhotoUrl } from '@/lib/photos';
 import { timeAgo } from '@/lib/time';
@@ -30,6 +34,28 @@ function audienceLabel(a: CardAudience): { icon: keyof typeof Ionicons.glyphMap;
 export function RequestCard({ card, showFullBody }: { card: Card; showFullBody?: boolean }) {
   const { colors } = useAppTheme();
   const pray = usePray();
+  const { data: me } = useMyProfile();
+  const translate = useTranslateRequest();
+  const [translation, setTranslation] = useState<Translation | null>(null);
+  const [showOriginal, setShowOriginal] = useState(false);
+  const myLanguage = me?.preferred_language ?? 'en';
+  const canTranslate =
+    !card.is_mine && Boolean(card.language) && baseLanguage(card.language) !== baseLanguage(myLanguage);
+  const showingTranslation = translation !== null && !showOriginal;
+  const body = showingTranslation ? translation.body : card.body;
+  const update = showingTranslation && translation.answered_update ? translation.answered_update : card.answered_update;
+
+  async function onTranslate() {
+    if (translation) {
+      setShowOriginal(!showOriginal);
+      return;
+    }
+    try {
+      setTranslation(await translate.mutateAsync({ requestId: card.id, language: myLanguage }));
+    } catch (e) {
+      notify('Could not translate', errorMessage(e));
+    }
+  }
   const { data: passions } = usePassions();
   const passion = passions?.find((p) => p.id === card.passion_id);
   const photo = useQuery({
@@ -111,9 +137,29 @@ export function RequestCard({ card, showFullBody }: { card: Card; showFullBody?:
 
       <Pressable onPress={openDetail} accessibilityRole="button" accessibilityHint="Opens the request and its responses">
         <Text variant="prayer" numberOfLines={showFullBody ? undefined : 8}>
-          {card.body}
+          {body}
         </Text>
       </Pressable>
+
+      {canTranslate ? (
+        <Pressable
+          onPress={onTranslate}
+          disabled={translate.isPending}
+          accessibilityRole="button"
+          accessibilityLabel={showingTranslation ? 'Show original' : 'Translate'}
+          hitSlop={8}
+          style={styles.translate}
+        >
+          <Ionicons name="language-outline" size={16} color={colors.textMuted} />
+          <Text variant="caption" tone="muted">
+            {translate.isPending
+              ? 'Translating…'
+              : showingTranslation
+                ? 'Translated by AI · Show original'
+                : 'Translate'}
+          </Text>
+        </Pressable>
+      ) : null}
 
       {photo.data ? (
         <Image
@@ -124,9 +170,9 @@ export function RequestCard({ card, showFullBody }: { card: Card; showFullBody?:
         />
       ) : null}
 
-      {answered && card.answered_update ? (
+      {answered && update ? (
         <View style={[styles.update, { borderColor: colors.answered }]}>
-          <Text variant="body">{card.answered_update}</Text>
+          <Text variant="body">{update}</Text>
         </View>
       ) : null}
 
@@ -190,6 +236,7 @@ const styles = StyleSheet.create({
   tag: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   photo: { width: '100%', aspectRatio: 4 / 3, borderRadius: radius.md },
   update: { borderLeftWidth: 3, paddingLeft: space.md },
+  translate: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', minHeight: 28 },
   actions: { flexDirection: 'row', gap: space.sm, flexWrap: 'wrap' },
   action: {
     minHeight: hitSize,

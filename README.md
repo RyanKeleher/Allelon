@@ -78,6 +78,19 @@ where followee_id = 'd0000000-0000-0000-0000-000000000001' and status = 'pending
 
 `npx expo start --web` runs the same screens in a browser. `scripts/screenshots.mjs` captures phone-sized screenshots of every Phase 1 screen against a local stack loaded with `supabase/demo.sql`.
 
+## AI features (translation and "Help me write")
+
+Both run in Supabase Edge Functions (`supabase/functions/translate`, `supabase/functions/suggest-response`), so the Anthropic API key never ships in the app. They only work on requests the person can already see (the database's visibility rules apply), translations are cached per request and language, and each person has a daily limit (100 translations, 30 suggestions).
+
+To turn them on for your Supabase project:
+
+```bash
+npx supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
+npx supabase functions deploy translate suggest-response
+```
+
+They use `claude-opus-5-5` at low effort by default. To use a different model, set `ALLELON_AI_MODEL` the same way (for example `npx supabase secrets set ALLELON_AI_MODEL=claude-haiku-5-5` for lower cost).
+
 ## Checks
 
 ```bash

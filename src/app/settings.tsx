@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { Chip } from '@/components/Chip';
 import { Screen } from '@/components/Screen';
 import { Text } from '@/components/Text';
 import { TextField } from '@/components/TextField';
@@ -9,12 +10,13 @@ import { errorMessage, notify } from '@/lib/dialogs';
 import { useMyProfile, useUserId } from '@/lib/auth';
 import { useUpdateProfile } from '@/lib/queries/people';
 import { supabase } from '@/lib/supabase';
-import { space } from '@/theme';
+import { space, useAppTheme, type Appearance } from '@/theme';
 
 export default function Settings() {
   const userId = useUserId();
   const { data: profile } = useMyProfile();
   const update = useUpdateProfile(userId);
+  const { appearance, setAppearance } = useAppTheme();
   const [name, setName] = useState(profile?.display_name ?? '');
   const [bio, setBio] = useState(profile?.bio ?? '');
 
@@ -36,6 +38,20 @@ export default function Settings() {
         <Button label="Save" onPress={save} loading={update.isPending} disabled={!name.trim()} />
       </View>
       <View style={styles.section}>
+        <Text variant="heading">Appearance</Text>
+        <View style={styles.row} accessibilityRole="radiogroup">
+          {(
+            [
+              ['light', 'Light'],
+              ['dark', 'Dark'],
+              ['system', 'Match my phone'],
+            ] as [Appearance, string][]
+          ).map(([value, label]) => (
+            <Chip key={value} label={label} selected={appearance === value} onPress={() => setAppearance(value)} />
+          ))}
+        </View>
+      </View>
+      <View style={styles.section}>
         <Text variant="heading">Account</Text>
         <Button label="Sign out" variant="secondary" onPress={() => supabase.auth.signOut()} />
       </View>
@@ -45,4 +61,5 @@ export default function Settings() {
 
 const styles = StyleSheet.create({
   section: { gap: space.md, paddingTop: space.xl },
+  row: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
 });
