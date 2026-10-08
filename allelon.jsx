@@ -154,7 +154,10 @@ function Globe({onSelect, selectedCode}){
     const sun = new THREE.DirectionalLight(0xfff4e0, 2.4);
     sun.position.set(6, 3, 5);
     scene.add(sun);
-    scene.add(Object.assign(new THREE.DirectionalLight(0x3355aa, 0.45), {position: new THREE.Vector3(-5,-2,-4)}));
+    // Object3D.position is read-only in r128, so set it in place rather than reassigning it
+    const rim = new THREE.DirectionalLight(0x3355aa, 0.45);
+    rim.position.set(-5, -2, -4);
+    scene.add(rim);
 
     // Starfield
     const starPos = new Float32Array(2400);
