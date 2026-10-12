@@ -222,3 +222,25 @@ export function usePrayedTogether(personId: string) {
     },
   });
 }
+
+export function useMarkAnswered() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, update }: { id: string; update: string }) => {
+      const { error } = await supabase.rpc('mark_request_answered', { p_request_id: id, p_update: update });
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: requestKeys.all }),
+  });
+}
+
+export function useReopenRequest() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.rpc('reopen_request', { p_request_id: id });
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: requestKeys.all }),
+  });
+}

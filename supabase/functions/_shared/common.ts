@@ -115,8 +115,8 @@ export async function askClaude({ system, user, maxTokens, schema }: AskOptions)
     throw new HttpError(422, 'This could not be processed.');
   }
   const text = response.content
-    .filter((b: { type: string }) => b.type === 'text')
-    .map((b: { text: string }) => b.text)
+    .filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === 'text')
+    .map((b) => b.text)
     .join('')
     .trim();
   if (!text) throw new HttpError(502, 'The assistant returned nothing.');

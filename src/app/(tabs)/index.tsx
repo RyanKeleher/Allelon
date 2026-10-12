@@ -5,21 +5,20 @@ import { FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-nat
 import { Button } from '@/components/Button';
 import { EmptyState } from '@/components/EmptyState';
 import { GroupsRow } from '@/components/GroupsRow';
+import { TodayCard } from '@/components/TodayCard';
 import { RequestCard } from '@/components/RequestCard';
 import { Screen } from '@/components/Screen';
 import { Text } from '@/components/Text';
-import { useUserId } from '@/lib/auth';
-import { useFollowRequests } from '@/lib/queries/people';
+import { useNotifications } from '@/lib/queries/notifications';
 import { useHomeFeed } from '@/lib/queries/requests';
 import { hitSize, space, useAppTheme } from '@/theme';
 
 export default function Home() {
-  const userId = useUserId();
   const { colors } = useAppTheme();
   const feed = useHomeFeed();
-  const requests = useFollowRequests(userId);
+  const notes = useNotifications();
   const cards = feed.data?.pages.flat() ?? [];
-  const pending = requests.data?.length ?? 0;
+  const unread = (notes.data ?? []).filter((n) => !n.read_at).length;
 
   return (
     <Screen padded={false}>
@@ -34,7 +33,7 @@ export default function Home() {
             refreshing={feed.isRefetching}
             onRefresh={() => {
               feed.refetch();
-              requests.refetch();
+              notes.refetch();
             }}
             tintColor={colors.accent}
           />
@@ -53,17 +52,18 @@ export default function Home() {
                 <Ionicons name="person-add-outline" size={22} color={colors.text} />
               </Pressable>
               <Pressable
-                onPress={() => router.push('/follow-requests')}
+                onPress={() => router.push('/notifications')}
                 accessibilityRole="button"
-                accessibilityLabel={pending ? `Follow requests, ${pending} waiting` : 'Follow requests'}
+                accessibilityLabel={unread ? `Notifications, ${unread} new` : 'Notifications'}
                 style={styles.iconButton}
               >
-                <Ionicons name="mail-outline" size={22} color={colors.text} />
-                {pending ? <View style={[styles.dot, { backgroundColor: colors.accent }]} /> : null}
+                <Ionicons name="notifications-outline" size={22} color={colors.text} />
+                {unread ? <View style={[styles.dot, { backgroundColor: colors.accent }]} /> : null}
               </Pressable>
             </View>
           </View>
           <GroupsRow />
+          <TodayCard />
           </View>
         }
         ListEmptyComponent={

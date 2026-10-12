@@ -6,6 +6,7 @@ import { Pressable, StyleSheet, Switch, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
+import { CrisisCard } from '@/components/CrisisCard';
 import { Screen } from '@/components/Screen';
 import { Text } from '@/components/Text';
 import { TextField } from '@/components/TextField';
@@ -20,6 +21,7 @@ import {
 } from '@/lib/audience';
 import { errorMessage, notify } from '@/lib/dialogs';
 import { useMyProfile, useUserId } from '@/lib/auth';
+import { mentionsSelfHarm } from '@/lib/crisis';
 import { pickPhoto, uploadRequestPhoto, type PickedPhoto } from '@/lib/photos';
 import { useMyGroups } from '@/lib/queries/groups';
 import { flagFor, usePassions } from '@/lib/queries/lookups';
@@ -96,6 +98,8 @@ export default function Compose() {
         maxLength={4000}
         autoFocus
       />
+
+      {mentionsSelfHarm(body) ? <CrisisCard forAuthor /> : null}
 
       <View style={styles.section}>
         <Text variant="label" tone="muted">

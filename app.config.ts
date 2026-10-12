@@ -3,6 +3,8 @@ import type { ConfigContext, ExpoConfig } from 'expo/config';
 // Native Google Sign-In needs the reversed iOS client ID as a URL scheme at
 // build time. Leave GOOGLE_IOS_URL_SCHEME unset to build without Google.
 const googleIosUrlScheme = process.env.GOOGLE_IOS_URL_SCHEME;
+// Push notifications need an EAS project (npx eas-cli@latest init prints it).
+const easProjectId = process.env.EAS_PROJECT_ID;
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -43,6 +45,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'expo-splash-screen',
       { backgroundColor: '#FAF6EF', dark: { backgroundColor: '#0B1825' } },
     ],
+    ['expo-notifications', { color: '#8A6516' }],
     [
       'expo-image-picker',
       { photosPermission: 'Allelon lets you attach a photo to a prayer request.' },
@@ -56,5 +59,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   extra: {
     googleSignInEnabled: Boolean(googleIosUrlScheme),
+    ...(easProjectId ? { eas: { projectId: easProjectId } } : {}),
   },
 });

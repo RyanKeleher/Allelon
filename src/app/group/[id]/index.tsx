@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { Chip } from '@/components/Chip';
 import { EmptyState } from '@/components/EmptyState';
 import { GroupAvatar } from '@/components/GroupAvatar';
 import { RequestCard } from '@/components/RequestCard';
@@ -32,6 +33,7 @@ export default function GroupScreen() {
   const requests = useJoinRequests();
   const create = useCreateRequest();
   const [body, setBody] = useState('');
+  const [view, setView] = useState<'open' | 'answered'>('open');
 
   const isAdmin = members.data?.some((m) => m.user_id === userId && m.role === 'admin') ?? false;
   const waiting = (requests.data ?? []).filter((r) => r.group_id === id && r.user_id !== userId).length;
@@ -46,7 +48,8 @@ export default function GroupScreen() {
     );
   }
   const g = group.data;
-  const cards = feed.data?.pages.flat() ?? [];
+  const allCards = feed.data?.pages.flat() ?? [];
+  const cards = allCards.filter((c) => (view === 'answered' ? c.status === 'answered' : c.status !== 'answered'));
 
   async function add() {
     try {
@@ -118,11 +121,18 @@ export default function GroupScreen() {
               <Button label="Share with the group" onPress={add} loading={create.isPending} disabled={!body.trim()} />
             </View>
 
-            <Text variant="heading">Prayer list</Text>
+            <View style={styles.viewRow}>
+              <Chip label="Prayer list" selected={view === 'open'} onPress={() => setView('open')} />
+              <Chip label="Answered" selected={view === 'answered'} onPress={() => setView('answered')} />
+            </View>
           </View>
         }
         ListEmptyComponent={
-          feed.isPending ? null : <EmptyState title="Nothing here yet" body="Be the first to share what's on your heart." />
+          feed.isPending ? null : view === 'answered' ? (
+            <EmptyState title="No answered prayers yet" body="When someone marks a request answered, it’s remembered here." />
+          ) : (
+            <EmptyState title="Nothing here yet" body="Be the first to share what's on your heart." />
+          )
         }
         ListFooterComponent={
           feed.hasNextPage ? (
@@ -156,4 +166,5 @@ const styles = StyleSheet.create({
   composer: { padding: space.lg, borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, gap: space.md },
   composerInput: { minHeight: 90 },
   footer: { marginTop: space.xl },
+  viewRow: { flexDirection: 'row', gap: space.sm },
 });

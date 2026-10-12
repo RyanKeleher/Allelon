@@ -10,6 +10,7 @@ import { Screen } from '@/components/Screen';
 import { Text } from '@/components/Text';
 import { useUserId } from '@/lib/auth';
 import { confirm } from '@/lib/dialogs';
+import { useSafetyMenu } from '@/lib/useSafetyMenu';
 import { useFollow, useFollowState, useProfile, useRemoveFollow } from '@/lib/queries/people';
 import { usePrayedTogether, useRequestsByAuthor } from '@/lib/queries/requests';
 import { timeAgo } from '@/lib/time';
@@ -23,6 +24,7 @@ export default function PersonProfile() {
   const state = useFollowState(userId, id);
   const requests = useRequestsByAuthor(id);
   const together = usePrayedTogether(id);
+  const safety = useSafetyMenu();
   const follow = useFollow();
   const unfollow = useRemoveFollow();
 
@@ -75,6 +77,11 @@ export default function PersonProfile() {
         variant={outgoing === 'none' ? 'primary' : 'secondary'}
         onPress={onFollowPress}
         loading={follow.isPending || unfollow.isPending}
+      />
+      <Button
+        label="Report or block"
+        variant="ghost"
+        onPress={() => safety.open({ targetType: 'profile', targetId: id, authorId: id, authorName: person.display_name })}
       />
       {outgoing === 'pending' ? (
         <Text variant="caption" tone="muted">

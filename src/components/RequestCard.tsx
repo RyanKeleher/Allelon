@@ -7,6 +7,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { useMyProfile } from '@/lib/auth';
 import { errorMessage, notify } from '@/lib/dialogs';
+import { useSafetyMenu } from '@/lib/useSafetyMenu';
 import { usePassions } from '@/lib/queries/lookups';
 import { baseLanguage, useTranslateRequest, type Translation } from '@/lib/queries/world';
 import { usePray } from '@/lib/queries/requests';
@@ -34,6 +35,7 @@ function audienceLabel(a: CardAudience): { icon: keyof typeof Ionicons.glyphMap;
 export function RequestCard({ card, showFullBody }: { card: Card; showFullBody?: boolean }) {
   const { colors } = useAppTheme();
   const pray = usePray();
+  const safety = useSafetyMenu();
   const { data: me } = useMyProfile();
   const translate = useTranslateRequest();
   const [translation, setTranslation] = useState<Translation | null>(null);
@@ -111,6 +113,24 @@ export function RequestCard({ card, showFullBody }: { card: Card; showFullBody?:
             </Text>
           </View>
         </Pressable>
+        {card.is_mine ? null : (
+          <Pressable
+            onPress={() =>
+              safety.open({
+                targetType: 'request',
+                targetId: card.id,
+                authorId: card.author_id,
+                authorName: card.author_name,
+              })
+            }
+            accessibilityRole="button"
+            accessibilityLabel="More options: report or block"
+            hitSlop={8}
+            style={styles.more}
+          >
+            <Ionicons name="ellipsis-horizontal" size={20} color={colors.textMuted} />
+          </Pressable>
+        )}
       </View>
 
       <View style={styles.tags}>
@@ -229,7 +249,8 @@ const styles = StyleSheet.create({
     paddingVertical: space.xs,
     borderRadius: radius.pill,
   },
-  header: { flexDirection: 'row', alignItems: 'center' },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  more: { width: hitSize, height: hitSize, alignItems: 'flex-end', justifyContent: 'center' },
   author: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: hitSize, flexShrink: 1 },
   authorText: { flexShrink: 1 },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: space.md },

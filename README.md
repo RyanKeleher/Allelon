@@ -91,6 +91,34 @@ npx supabase functions deploy translate suggest-response
 
 They use `claude-opus-5-5` at low effort by default. To use a different model, set `ALLELON_AI_MODEL` the same way (for example `npx supabase secrets set ALLELON_AI_MODEL=claude-haiku-5-5` for lower cost).
 
+## Notifications, check-ins, and safety
+
+**In-app notifications** work with no extra setup: responses, follow requests, group join requests, answered prayers, and gentle check-ins (a reminder a few days after you pray for someone; people can turn these off in Settings).
+
+**Push notifications** (to the phone's lock screen) need three one-time steps. Pushes never include anyone's prayer text, only who did what.
+
+1. Create an EAS project: `npx eas-cli@latest init`, then add the printed id to `.env.local` as `EAS_PROJECT_ID=...`. Push needs a development or TestFlight build (`npx eas-cli@latest build --profile development`), not Expo Go.
+2. Deploy the functions: `npx supabase functions deploy send-push delete-account`.
+3. In the Supabase SQL editor, let the database call `send-push` every minute:
+   ```sql
+   select vault.create_secret('https://<your-project-ref>.supabase.co', 'project_url');
+   select vault.create_secret('<your service_role key>', 'service_role_key');
+   ```
+   The service role key is under Project Settings → API. It stays inside the database's encrypted Vault.
+
+**Moderation.** Every request, response, and profile has Report and Block. To make someone a moderator (they get a Reports screen in Settings), run in the SQL editor:
+```sql
+update profiles set is_moderator = true where handle = 'their_handle';
+```
+
+**Crisis resources.** If a request or response mentions suicide or self-harm, the author and readers see a gentle card with crisis lines for their country (988 in the US and Canada, Samaritans in the UK and Ireland, Lifeline in Australia, and findahelpline.com everywhere). Nothing is posted or sent on anyone's behalf.
+
+**Deleting an account** (Settings → Delete my account) removes the person's photos and every row they own. Groups they ran pass to the next member.
+
+## Grow content
+
+Grow is curated, not AI-generated, and every item cites its source. It lives in `supabase/migrations/20261012000002_grow_content.sql`: scripture on prayer quoted exactly from the World English Bible (public domain), the ACTS prayer pattern, and links to BibleProject, 24-7 Prayer, Pray as you go, and Desiring God. Edit that file to change it.
+
 ## Checks
 
 ```bash

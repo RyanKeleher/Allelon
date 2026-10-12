@@ -172,7 +172,21 @@ export function useUpdateProfile(myId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (
-      patch: Partial<Pick<Profile, 'display_name' | 'handle' | 'bio' | 'country_code' | 'preferred_language' | 'onboarded_at' | 'avatar_url'>>,
+      patch: Partial<
+        Pick<
+          Profile,
+          | 'display_name'
+          | 'handle'
+          | 'bio'
+          | 'country_code'
+          | 'preferred_language'
+          | 'onboarded_at'
+          | 'avatar_url'
+          | 'checkins_enabled'
+          | 'checkin_after_days'
+          | 'push_enabled'
+        >
+      >,
     ) => {
       const { error } = await supabase.from('profiles').update(patch).eq('id', myId);
       if (error) throw error;

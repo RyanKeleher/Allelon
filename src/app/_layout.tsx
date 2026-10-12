@@ -7,6 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
 import { AuthProvider, useAuth, useMyProfile } from '@/lib/auth';
+import { useNotificationTaps } from '@/lib/push';
 import { AppThemeProvider, fonts, useAppTheme } from '@/theme';
 
 SplashScreen.preventAutoHideAsync();
@@ -37,6 +38,7 @@ function RootNavigator() {
   const { session, loading } = useAuth();
   const profile = useMyProfile();
   const { colors, scheme } = useAppTheme();
+  useNotificationTaps();
 
   const signedIn = Boolean(session);
   const onboarded = Boolean(profile.data?.onboarded_at);
@@ -93,6 +95,9 @@ function RootNavigator() {
           <Stack.Screen name="group/[id]/members" options={{ title: 'Members' }} />
           <Stack.Screen name="join/[code]" options={{ title: 'Join group' }} />
           <Stack.Screen name="country/[code]" options={{ title: '' }} />
+          <Stack.Screen name="notifications" options={{ title: 'Notifications' }} />
+          <Stack.Screen name="answer/[id]" options={{ presentation: 'modal', title: 'Answered' }} />
+          <Stack.Screen name="moderation" options={{ title: 'Reports' }} />
         </Stack.Protected>
       </Stack>
     </ThemeProvider>

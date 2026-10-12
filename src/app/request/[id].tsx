@@ -1,11 +1,12 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
+import { CrisisCard } from '@/components/CrisisCard';
 import { EmptyState } from '@/components/EmptyState';
 import { RequestCard } from '@/components/RequestCard';
 import { Screen } from '@/components/Screen';
@@ -13,10 +14,12 @@ import { Text } from '@/components/Text';
 import { TextField } from '@/components/TextField';
 import { confirm, errorMessage, notify } from '@/lib/dialogs';
 import { useMyProfile, useUserId } from '@/lib/auth';
-import { useDeleteRequest, useRequest, useRespond, useResponses } from '@/lib/queries/requests';
+import { mentionsSelfHarm } from '@/lib/crisis';
+import { useDeleteRequest, useReopenRequest, useRequest, useRespond, useResponses } from '@/lib/queries/requests';
+import { useSafetyMenu } from '@/lib/useSafetyMenu';
 import { useSuggestResponse } from '@/lib/queries/world';
 import { timeAgo } from '@/lib/time';
-import { radius, space, useAppTheme } from '@/theme';
+import { hitSize, radius, space, useAppTheme } from '@/theme';
 
 export default function RequestDetail() {
   const { id, respond } = useLocalSearchParams<{ id: string; respond?: string }>();
@@ -31,6 +34,8 @@ export default function RequestDetail() {
   const suggest = useSuggestResponse();
   const [suggested, setSuggested] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
+  const reopen = useReopenRequest();
+  const safety = useSafetyMenu();
 
   const card = request.data;
   if (request.isPending) return <Screen>{null}</Screen>;
@@ -66,9 +71,34 @@ export default function RequestDetail() {
     router.back();
   }
 
+  const crisis =
+    mentionsSelfHarm(card.body) || (responses.data ?? []).some((r) => mentionsSelfHarm(r.body)) || mentionsSelfHarm(body);
+
   return (
     <Screen scroll edges={['bottom']}>
       <RequestCard card={card} showFullBody />
+
+      {crisis ? <CrisisCard forAuthor={Boolean(card.is_mine)} /> : null}
+
+      {card.is_mine && card.kind === 'request' ? (
+        <View style={styles.answerRow}>
+          <Button
+            label={card.status === 'answered' ? 'Edit answered update' : 'Mark as answered'}
+            variant={card.status === 'answered' ? 'secondary' : 'primary'}
+            onPress={() => router.push({ pathname: '/answer/[id]', params: { id } })}
+          />
+          {card.status === 'answered' ? (
+            <Button
+              label="Not answered yet? Reopen"
+              variant="ghost"
+              loading={reopen.isPending}
+              onPress={async () => {
+                if (await confirm('Reopen this request?', 'It will show as open again.', 'Reopen')) reopen.mutate(id);
+              }}
+            />
+          ) : null}
+        </View>
+      ) : null}
 
       <View style={styles.section}>
         <Text variant="heading">Responses</Text>
@@ -89,6 +119,24 @@ export default function RequestDetail() {
                 <Text variant="caption" tone="muted">
                   {timeAgo(r.created_at)}
                 </Text>
+                {r.author_id !== userId ? (
+                  <Pressable
+                    onPress={() =>
+                      safety.open({
+                        targetType: 'response',
+                        targetId: r.id,
+                        authorId: r.author_id,
+                        authorName: r.author?.display_name,
+                      })
+                    }
+                    accessibilityRole="button"
+                    accessibilityLabel="More options for this response"
+                    hitSlop={8}
+                    style={styles.more}
+                  >
+                    <Ionicons name="ellipsis-horizontal" size={18} color={colors.textMuted} />
+                  </Pressable>
+                ) : null}
               </View>
               <Text variant="prayer" style={styles.responseBody}>
                 {r.body}
@@ -174,5 +222,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: space.sm, flexWrap: 'wrap' },
   flex: { flex: 1 },
   delete: { marginTop: space.xl },
+  answerRow: { gap: space.xs },
+  more: { width: hitSize - 12, height: hitSize - 12, alignItems: 'flex-end', justifyContent: 'center' },
   helpRow: { alignItems: 'flex-start', gap: space.xs },
 });

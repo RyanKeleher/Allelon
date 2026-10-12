@@ -67,6 +67,37 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"checkin_reminders": {
+                  Row: {
+                    "due_at": string,"request_id": string,"sent_at": string | null,"user_id": string
+                  }
+                  Insert: {
+                    "due_at": string,"request_id": string,"sent_at"?: string | null,"user_id": string
+                  }
+                  Update: {
+                    "due_at"?: string,"request_id"?: string,"sent_at"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "checkin_reminders_request_id_fkey"
+      columns: ["request_id"]
+isOneToOne: false
+      referencedRelation: "prayer_requests"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "checkin_reminders_request_id_fkey"
+      columns: ["request_id"]
+isOneToOne: false
+      referencedRelation: "request_cards"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "checkin_reminders_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"close_friends": {
                   Row: {
                     "created_at": string,"friend_id": string,"owner_id": string
@@ -230,6 +261,62 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"grow_items": {
+                  Row: {
+                    "body": string,"id": string,"kind": Database["public"]['Enums']["grow_kind"],"reference": string | null,"sort_order": number,"source_name": string,"source_url": string,"title": string
+                  }
+                  Insert: {
+                    "body"?: string,"id": string,"kind": Database["public"]['Enums']["grow_kind"],"reference"?: string | null,"sort_order"?: number,"source_name": string,"source_url": string,"title": string
+                  }
+                  Update: {
+                    "body"?: string,"id"?: string,"kind"?: Database["public"]['Enums']["grow_kind"],"reference"?: string | null,"sort_order"?: number,"source_name"?: string,"source_url"?: string,"title"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"notifications": {
+                  Row: {
+                    "actor_id": string | null,"created_at": string,"group_id": string | null,"id": number,"kind": Database["public"]['Enums']["notification_kind"],"pushed_at": string | null,"read_at": string | null,"request_id": string | null,"user_id": string
+                  }
+                  Insert: {
+                    "actor_id"?: string | null,"created_at"?: string,"group_id"?: string | null,"id"?: never,"kind": Database["public"]['Enums']["notification_kind"],"pushed_at"?: string | null,"read_at"?: string | null,"request_id"?: string | null,"user_id": string
+                  }
+                  Update: {
+                    "actor_id"?: string | null,"created_at"?: string,"group_id"?: string | null,"id"?: never,"kind"?: Database["public"]['Enums']["notification_kind"],"pushed_at"?: string | null,"read_at"?: string | null,"request_id"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "notifications_actor_id_fkey"
+      columns: ["actor_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "notifications_group_id_fkey"
+      columns: ["group_id"]
+isOneToOne: false
+      referencedRelation: "groups"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "notifications_request_id_fkey"
+      columns: ["request_id"]
+isOneToOne: false
+      referencedRelation: "prayer_requests"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "notifications_request_id_fkey"
+      columns: ["request_id"]
+isOneToOne: false
+      referencedRelation: "request_cards"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "notifications_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"passions": {
                   Row: {
                     "icon": string,"id": string,"label": string,"sort_order": number
@@ -338,13 +425,13 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "avatar_url": string | null,"bio": string,"country_code": string | null,"created_at": string,"display_name": string,"handle": string | null,"id": string,"onboarded_at": string | null,"preferred_language": string,"updated_at": string
+                    "avatar_url": string | null,"bio": string,"checkin_after_days": number,"checkins_enabled": boolean,"country_code": string | null,"created_at": string,"display_name": string,"handle": string | null,"id": string,"is_moderator": boolean,"onboarded_at": string | null,"preferred_language": string,"push_enabled": boolean,"updated_at": string
                   }
                   Insert: {
-                    "avatar_url"?: string | null,"bio"?: string,"country_code"?: string | null,"created_at"?: string,"display_name"?: string,"handle"?: string | null,"id": string,"onboarded_at"?: string | null,"preferred_language"?: string,"updated_at"?: string
+                    "avatar_url"?: string | null,"bio"?: string,"checkin_after_days"?: number,"checkins_enabled"?: boolean,"country_code"?: string | null,"created_at"?: string,"display_name"?: string,"handle"?: string | null,"id": string,"is_moderator"?: boolean,"onboarded_at"?: string | null,"preferred_language"?: string,"push_enabled"?: boolean,"updated_at"?: string
                   }
                   Update: {
-                    "avatar_url"?: string | null,"bio"?: string,"country_code"?: string | null,"created_at"?: string,"display_name"?: string,"handle"?: string | null,"id"?: string,"onboarded_at"?: string | null,"preferred_language"?: string,"updated_at"?: string
+                    "avatar_url"?: string | null,"bio"?: string,"checkin_after_days"?: number,"checkins_enabled"?: boolean,"country_code"?: string | null,"created_at"?: string,"display_name"?: string,"handle"?: string | null,"id"?: string,"is_moderator"?: boolean,"onboarded_at"?: string | null,"preferred_language"?: string,"push_enabled"?: boolean,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -353,6 +440,50 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "countries"
       referencedColumns: ["code"]
+    }
+                  ]
+                },"push_tokens": {
+                  Row: {
+                    "platform": string,"token": string,"updated_at": string,"user_id": string
+                  }
+                  Insert: {
+                    "platform": string,"token": string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Update: {
+                    "platform"?: string,"token"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "push_tokens_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"reports": {
+                  Row: {
+                    "created_at": string,"details": string,"id": number,"reason": string,"reporter_id": string,"resolved_at": string | null,"resolved_by": string | null,"status": Database["public"]['Enums']["report_status"],"target_id": string,"target_type": Database["public"]['Enums']["report_target"]
+                  }
+                  Insert: {
+                    "created_at"?: string,"details"?: string,"id"?: never,"reason": string,"reporter_id"?: string,"resolved_at"?: string | null,"resolved_by"?: string | null,"status"?: Database["public"]['Enums']["report_status"],"target_id": string,"target_type": Database["public"]['Enums']["report_target"]
+                  }
+                  Update: {
+                    "created_at"?: string,"details"?: string,"id"?: never,"reason"?: string,"reporter_id"?: string,"resolved_at"?: string | null,"resolved_by"?: string | null,"status"?: Database["public"]['Enums']["report_status"],"target_id"?: string,"target_type"?: Database["public"]['Enums']["report_target"]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "reports_reporter_id_fkey"
+      columns: ["reporter_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "reports_resolved_by_fkey"
+      columns: ["resolved_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
     }
                   ]
                 },"request_translations": {
@@ -518,6 +649,14 @@ isOneToOne: false
 "leave_group":
 { Args: { "p_group_id": string }; Returns: undefined
                            },
+"mark_request_answered":
+{ Args: { "p_request_id": string,"p_update"?: string }; Returns: undefined
+                           },
+"moderation_queue":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "content": string,"content_author": string,"created_at": string,"details": string,"reason": string,"report_count": number,"report_id": number,"target_id": string,"target_type": Database["public"]['Enums']["report_target"]
+            }[]
+                           },
 "prayed_together":
 { Args: { "p_person": string }; Returns: {
               "answered_at": string | null,
@@ -549,14 +688,23 @@ isOneToOne: false
         isOneToOne: false
         isSetofReturn: true
       } },
+"register_push_token":
+{ Args: { "p_platform": string,"p_token": string }; Returns: undefined
+                           },
 "remove_group_member":
 { Args: { "p_group_id": string,"p_user_id": string }; Returns: undefined
+                           },
+"reopen_request":
+{ Args: { "p_request_id": string }; Returns: undefined
                            },
 "request_to_join_group":
 { Args: { "p_code": string }; Returns: string
                            },
 "reset_group_invite_code":
 { Args: { "p_group_id": string }; Returns: string
+                           },
+"resolve_report":
+{ Args: { "p_action": string,"p_target_id": string,"p_target_type": Database["public"]['Enums']["report_target"] }; Returns: undefined
                            },
 "respond_to_join_request":
 { Args: { "p_approve": boolean,"p_group_id": string,"p_user_id": string }; Returns: undefined
@@ -605,7 +753,7 @@ isOneToOne: false
       } }
           }
           Enums: {
-            "audience_type": "followers"|"close_friends"|"group"|"world","follow_status": "pending"|"accepted","group_role": "admin"|"member","request_kind": "request"|"moment","request_status": "open"|"answered"
+            "audience_type": "followers"|"close_friends"|"group"|"world","follow_status": "pending"|"accepted","group_role": "admin"|"member","grow_kind": "scripture"|"practice"|"link"|"video","notification_kind": "answered"|"response"|"checkin"|"follow_request"|"join_request","report_status": "open"|"actioned"|"dismissed","report_target": "request"|"response"|"profile","request_kind": "request"|"moment","request_status": "open"|"answered"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -725,7 +873,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "audience_type": ["followers", "close_friends", "group", "world"],"follow_status": ["pending", "accepted"],"group_role": ["admin", "member"],"request_kind": ["request", "moment"],"request_status": ["open", "answered"]
+            "audience_type": ["followers", "close_friends", "group", "world"],"follow_status": ["pending", "accepted"],"group_role": ["admin", "member"],"grow_kind": ["scripture", "practice", "link", "video"],"notification_kind": ["answered", "response", "checkin", "follow_request", "join_request"],"report_status": ["open", "actioned", "dismissed"],"report_target": ["request", "response", "profile"],"request_kind": ["request", "moment"],"request_status": ["open", "answered"]
           }
         }
 } as const
