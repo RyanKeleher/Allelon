@@ -5,12 +5,23 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
-import { Globe } from '@/components/Globe';
 import { Text } from '@/components/Text';
 import { TextField } from '@/components/TextField';
 import { flagFor } from '@/lib/queries/lookups';
 import { useWorldCountries, type CountryWithCount } from '@/lib/queries/world';
 import { hitSize, radius, space, useAppTheme } from '@/theme';
+
+// The 3D globe depends on native GL support. Load it lazily so that if it
+// fails on a device, the World tab (and its country list) still works.
+let Globe: typeof import('@/components/Globe').Globe | null = null;
+let globeError: string | null = null;
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  Globe = require('../../components/Globe').Globe;
+} catch (e) {
+  globeError = e instanceof Error ? `${e.message}\n${e.stack ?? ''}` : String(e);
+  console.warn('Globe unavailable:', globeError);
+}
 
 export default function WorldTab() {
   const { colors } = useAppTheme();
@@ -43,13 +54,19 @@ export default function WorldTab() {
           <Text tone="muted">Pray for people you may never meet. Tap a light to see who’s asking.</Text>
         </View>
 
-        <Globe
-          markers={markers}
-          selected={selected}
-          onSelect={setSelected}
-          accentColor={colors.accent}
-          selectedColor="#ffffff"
-        />
+        {Globe ? (
+          <Globe
+            markers={markers}
+            selected={selected}
+            onSelect={setSelected}
+            accentColor={colors.accent}
+            selectedColor="#ffffff"
+          />
+        ) : __DEV__ && globeError ? (
+          <Text tone="muted" selectable>
+            The globe couldn’t load on this device: {globeError}
+          </Text>
+        ) : null}
 
         {current ? (
           <View style={[styles.selected, { backgroundColor: colors.surface, borderColor: colors.border }]}>
